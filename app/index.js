@@ -39,13 +39,13 @@ messaging.peerSocket.onmessage = evt => {
   
   if(evt.data.key==="blastNum" && evt.data.newValue)
     blastNum=JSON.parse(evt.data.newValue);
-  if (evt.data.key === "Response" && evt.data.value) {
+  if (evt.data.key === "Response") {
     let val=evt.data.value;
     if(typeof(val)==="boolean"){
       if(val)
         val="OK";
       else
-        val="FAILED";
+        val="FAILED!";
     }
     console.log("Response = " + val)
     if(val.length==12 && (val==="Sending 1..." || val==="Sending 2..." || val==="Sending 3...")){
@@ -61,7 +61,9 @@ messaging.peerSocket.onmessage = evt => {
       responseDisplay.text = counter+"/"+blastNum+" "+val;
     }else if(!currentBlast){
       responseDisplay.text = val;
+      console.log("HIT")
     }
+    console.log(val+" | "+currentBlast+" | "+typeof(currentBlast));
   }
   if (Label1.text == "" && Label2.text == "" && Label3.text == "") {
     Label1.text = "            Please"

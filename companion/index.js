@@ -35,7 +35,8 @@ function restoreSettings() {
   blast.push(settingsStorage.getItem('Blast3'));
   for(let i in blast){blast[i]=(blast[i]==="true")}
   sendVal({key:'Blast', newValue:blast});
-  sendVal({key:'blastNum', newValue:JSON.parse(settingsStorage.getItem('BlastURL')).length});
+  if(settingsStorage.getItem('BlastURL'))
+    sendVal({key:'blastNum', newValue:JSON.parse(settingsStorage.getItem('BlastURL')).length});
 }
 
 // Send data to device using Messaging API
@@ -82,6 +83,7 @@ messaging.peerSocket.onmessage = evt => {
       }else{
         fetch(url, {method: "GET"}) 
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
+        .catch(function(error){sendVal({key:'Response', value:false}); console.log(error)})
       }
     }
     else{
@@ -90,6 +92,7 @@ messaging.peerSocket.onmessage = evt => {
       }else{
       fetch(url, {method: "GET", headers: JSON.parse(headers)})
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
+        .catch(function(error){sendVal({key:'Response', value:false}); console.log(error)})
       }
     }
   }
@@ -102,7 +105,7 @@ messaging.peerSocket.onmessage = evt => {
       }else{
         fetch(url, {method: "POST", body: data}) 
           .then(function(response) {sendVal({key:'Response', value:response.ok})})
-          .catch(function(error){console.log(error)})
+          .catch(function(error){sendVal({key:'Response', value:false}); console.log(error)})
       }
     }
     else {
@@ -113,6 +116,7 @@ messaging.peerSocket.onmessage = evt => {
         .then(function(res){sendVal({key:'Response', value:res.ok}); return res})
         .then(res => res.text())
         .then(function(response) {console.log(response)})
+        .catch(function(error){sendVal({key:'Response', value:false}); console.log(error)})
       }
     }
   }
@@ -164,6 +168,12 @@ function requestBlaster(url, data){
     console.log(urls[i].name);
     fetch(urls[i].name, data) 
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
-        .catch(function(error){console.log(error)})
+        .catch(function(error){sendVal({key:'Response', value:false}); console.log(error)})
   }
+}
+
+if(settingsStorage.getItem('Blast1')==null){
+  settingsStorage.setItem('Blast1',false);
+  settingsStorage.setItem('Blast2',false);
+  settingsStorage.setItem('Blast3',false);
 }
