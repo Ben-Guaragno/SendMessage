@@ -8,7 +8,7 @@ This modified version of @PeterSumm's app is also not available on the FitBit ap
 
 See a copy of @PeterSumm's instructions below, or at his GitHub repo for this project.
 
-###Original README
+## Original README
 
 This is a port of my Send Message app from Pebble - an HTTPS client supporting GET and POST requests (though HTTP only works to IP addresses on your own network).  It is intended for technically proficient audience and use of its more advanced features requires some understanding of JSON data structures.
 
