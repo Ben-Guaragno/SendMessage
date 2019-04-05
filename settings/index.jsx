@@ -10,6 +10,7 @@ function mySettings(props) {
         <TextInput
           settingsKey="URL1"
           label="URL:"
+          disabled={!(props.settings.Blast1 === "false")}
         />
         <TextInput
           settingsKey="Data1"
@@ -18,6 +19,10 @@ function mySettings(props) {
         <TextInput
           settingsKey="Headers1"
           label="Headers:"
+        />
+        <Toggle
+          settingsKey="Blast1"
+          label="Blast"
         />
       </Section>
       <Section
@@ -29,6 +34,7 @@ function mySettings(props) {
         <TextInput
           settingsKey="URL2"
           label="URL:"
+          disabled={!(props.settings.Blast2 === "false")}
         />
         <TextInput
           settingsKey="Data2"
@@ -37,6 +43,10 @@ function mySettings(props) {
         <TextInput
           settingsKey="Headers2"
           label="Headers:"
+        />
+        <Toggle
+          settingsKey="Blast2"
+          label="Blast"
         />
       </Section>
       <Section
@@ -48,6 +58,7 @@ function mySettings(props) {
         <TextInput
           settingsKey="URL3"
           label="URL:"
+          disabled={!(props.settings.Blast3 === "false")}
         />
         <TextInput
           settingsKey="Data3"
@@ -57,6 +68,27 @@ function mySettings(props) {
           settingsKey="Headers3"
           label="Headers:"
         />
+        <Toggle
+          settingsKey="Blast3"
+          label="Blast"
+        />
+      </Section>
+      <Section
+        title={<Text bold align="center">Blast URLs</Text>}>
+        <AdditiveList
+          settingsKey="BlastURL"
+          addAction={
+            <TextInput
+              label="Add URL"
+            />
+          }
+          renderItem={({name}) =>
+            <TextImageRow
+              label={"URL: "+name}
+            />
+          }
+        />
+        <Text>Setting a Message to blast will send an identical request to every listed URL</Text>
       </Section>
       <Section
         title={<Text bold align="center">Instructions</Text>}>

@@ -10,6 +10,11 @@ let Label1 = document.getElementById("Label1");
 let Label2 = document.getElementById("Label2");
 let Label3 = document.getElementById("Label3");
 let responseDisplay = document.getElementById("responseDisplay");
+let Blast;
+let blastNum;
+let counter=0;
+let current;
+let currentBlast;
 
 // Message is received
 messaging.peerSocket.onmessage = evt => {
@@ -20,10 +25,43 @@ messaging.peerSocket.onmessage = evt => {
     Label2.text = JSON.parse(evt.data.newValue).name;
   if (evt.data.key === "Label3" && evt.data.newValue)
     Label3.text = JSON.parse(evt.data.newValue).name;
+  
+  if(evt.data.key==="Blast1" && evt.data.newValue)
+    Blast[0]=JSON.parse(evt.data.newValue);
+  if(evt.data.key==="Blast2" && evt.data.newValue)
+    Blast[1]=JSON.parse(evt.data.newValue);
+  if(evt.data.key==="Blast3" && evt.data.newValue)
+    Blast[2]=JSON.parse(evt.data.newValue);
+  
+  if(evt.data.key==="Blast" && evt.data.newValue){
+    Blast=evt.data.newValue;
+  }
+  
+  if(evt.data.key==="blastNum" && evt.data.newValue)
+    blastNum=JSON.parse(evt.data.newValue);
   if (evt.data.key === "Response" && evt.data.value) {
-    console.log("Response = " + evt.data.value)
-    responseDisplay.style.display = "inline"
-    responseDisplay.text = evt.data.value;
+    let val=evt.data.value;
+    if(typeof(val)==="boolean"){
+      if(val)
+        val="OK";
+      else
+        val="FAILED";
+    }
+    console.log("Response = " + val)
+    if(val.length==12 && (val==="Sending 1..." || val==="Sending 2..." || val==="Sending 3...")){
+      current=parseInt(val[8]);
+      currentBlast=Blast[current-1];
+      if(currentBlast)
+        counter=0;
+      responseDisplay.style.display = "inline"
+      responseDisplay.text = val;
+    }
+    else if(val==="OK" && currentBlast){
+      counter++
+      responseDisplay.text = counter+"/"+blastNum+" "+val;
+    }else if(!currentBlast){
+      responseDisplay.text = val;
+    }
   }
   if (Label1.text == "" && Label2.text == "" && Label3.text == "") {
     Label1.text = "            Please"
