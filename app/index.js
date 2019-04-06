@@ -61,9 +61,7 @@ messaging.peerSocket.onmessage = evt => {
       responseDisplay.text = counter+"/"+blastNum+" "+val;
     }else if(!currentBlast){
       responseDisplay.text = val;
-      console.log("HIT")
     }
-    console.log(val+" | "+currentBlast+" | "+typeof(currentBlast));
   }
   if (Label1.text == "" && Label2.text == "" && Label3.text == "") {
     Label1.text = "            Please"

@@ -62,14 +62,16 @@ messaging.peerSocket.onmessage = evt => {
   let label = ""
   try {label = JSON.parse(settingsStorage.getItem('Label'+msg)).name} catch(err) {} 
   let url = ""
-  try {url = JSON.parse(settingsStorage.getItem('URL'+msg)).name} catch(err) {} 
-  url=dataReplace(url, 1);
-  console.log(label+" encoded: "+encodeURIComponent(label))
+  let blast=JSON.parse(settingsStorage.getItem('Blast'+msg));
+  if(!blast){
+    try {url = JSON.parse(settingsStorage.getItem('URL'+msg)).name} catch(err) {} 
+    url=dataReplace(url, 1, msg);
+  }
   let data = ""
   try {data = JSON.parse(settingsStorage.getItem('Data'+msg)).name} catch(err) {}
   let headers = ""
   try {headers = JSON.parse(settingsStorage.getItem('Headers'+msg)).name} catch(err) {}
-  let blast=JSON.parse(settingsStorage.getItem('Blast'+msg));
+  
   console.log("Blast =  "+blast)
   console.log("URL = "+ url)
   console.log("Data = " + data)
@@ -79,7 +81,7 @@ messaging.peerSocket.onmessage = evt => {
   if (data == ""){
     if (headers == ""){
       if(blast){
-        requestBlaster(url, {method: "GET"})
+        requestBlaster({method: "GET"})
       }else{
         fetch(url, {method: "GET"}) 
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
@@ -88,7 +90,7 @@ messaging.peerSocket.onmessage = evt => {
     }
     else{
       if(blast){
-        requestBlaster(url, {method: "GET", headers: JSON.parse(headers)})
+        requestBlaster({method: "GET", headers: JSON.parse(headers)})
       }else{
       fetch(url, {method: "GET", headers: JSON.parse(headers)})
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
@@ -98,10 +100,10 @@ messaging.peerSocket.onmessage = evt => {
   }
   //Data, send POST request
   else {
-    data = dataReplace(data, 0);
+    data = dataReplace(data, 0, msg);
     if (headers == ""){
       if(blast){
-        requestBlaster(url, {method: "POST", body: data})
+        requestBlaster({method: "POST", body: data})
       }else{
         fetch(url, {method: "POST", body: data}) 
           .then(function(response) {sendVal({key:'Response', value:response.ok})})
@@ -110,12 +112,12 @@ messaging.peerSocket.onmessage = evt => {
     }
     else {
       if(blast){
-        requestBlaster(url, {method: "POST", headers: JSON.parse(headers), body: data})
+        requestBlaster({method: "POST", headers: JSON.parse(headers), body: data})
       }else{
       fetch(url, {method: "POST", headers: JSON.parse(headers), body: data})
         .then(function(res){sendVal({key:'Response', value:res.ok}); return res})
         .then(res => res.text())
-        .then(function(response) {console.log(response)})
+        // .then(function(response) {console.log(response)})
         .catch(function(error){sendVal({key:'Response', value:false}); console.log(error)})
       }
     }
@@ -130,30 +132,36 @@ messaging.peerSocket.onmessage = evt => {
                ~time  Time value of location data
                ~acc   Accuracy of location data
 */
-function dataReplace(s, isEncode){
+function dataReplace(s, isEncode, msg){
   let loc;
   let accuracy;
   let time;
   
-  let options={enableHighAccuracy: true};
-
-  geolocation.getCurrentPosition(function(position) {
-    var date=new Date(position.timestamp);
-    time=date.toLocaleString();
-    accuracy=position.coords.accuracy;
-    loc=position.coords.latitude+","+position.coords.longitude;
-  }, locationError, options)
-  
   let label = ""
   try {label = JSON.parse(settingsStorage.getItem('Label'+msg)).name} catch(err) {}
+  if(isEncode)
+    label=encodeURIComponent(label);
   
-  if(isEncode){
-    loc=encodeURIComponent(loc);
-    time=encodeURIComponent(time);
-    accuracy=encodeURIComponent(accuracy);
+  if(s.includes("~loc") || s.includes("~time") || s.includes("~acc")){
+    console.log("Location call initiated");
+    let options={enableHighAccuracy: true, timeout:5000};
+    geolocation.getCurrentPosition(function(position) {
+      var date=new Date(position.timestamp);
+      time=date.toLocaleString();
+      accuracy=position.coords.accuracy;
+      loc=position.coords.latitude+","+position.coords.longitude;
+    }, locationError, options)
+    
+    if(isEncode){
+      loc=encodeURIComponent(loc);
+      time=encodeURIComponent(time);
+      accuracy=encodeURIComponent(accuracy);
+    }
+    
+    return s.replace(/~Lbl/g,label).replace(/~loc/g,loc).replace(/~time/g,time).replace(/~acc/g,accuracy);
+  }else{
+    return s.replace(/~Lbl/g,label);
   }
-  
-  return s.replace(/~Lbl/g,label).replace(/~loc/g,loc).replace(/~time/g,time).replace(/~acc/g,accuracy);
 }
 
 
@@ -161,12 +169,13 @@ function dataReplace(s, isEncode){
   Fires off multile web requests on one button click
   Passed the url and relevant request data
 */
-function requestBlaster(url, data){
+function requestBlaster(data){
   let urls=JSON.parse(settingsStorage.getItem('BlastURL'));
   let i;
   for(i in urls){
     console.log(urls[i].name);
-    fetch(urls[i].name, data) 
+    let tmpURL=dataReplace(urls[i].name, 1);
+    fetch(tmpURL, data) 
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
         .catch(function(error){sendVal({key:'Response', value:false}); console.log(error)})
   }
