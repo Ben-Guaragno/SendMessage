@@ -52,8 +52,10 @@ messaging.peerSocket.onmessage = evt => {
     if(val.length==12 && (val==="Sending 1..." || val==="Sending 2..." || val==="Sending 3...")){
       current=parseInt(val[8]);
       currentBlast=Blast[current-1];
-      if(currentBlast)
+      if(currentBlast){
         counter=0;
+        successCounter=0;
+      }
       responseDisplay.style.display = "inline"
       responseDisplay.text = val;
     }
