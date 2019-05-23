@@ -13,6 +13,7 @@ let responseDisplay = document.getElementById("responseDisplay");
 let Blast;
 let blastNum;
 let counter=0;
+let successCounter=0;
 let current;
 let currentBlast;
 
@@ -57,8 +58,12 @@ messaging.peerSocket.onmessage = evt => {
       responseDisplay.text = val;
     }
     else if(val==="OK" && currentBlast){
-      counter++
-      responseDisplay.text = counter+"/"+blastNum+" "+val;
+      counter++;
+      successCounter++;
+      responseDisplay.text = successCounter+"/"+blastNum+" "+val;
+    }else if(currentBlast){
+      counter++;
+      responseDisplay.text = blastNum-successCounter+"/"+blastNum+" "+val;
     }else if(!currentBlast){
       responseDisplay.text = val;
     }
