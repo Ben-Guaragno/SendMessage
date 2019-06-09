@@ -1,11 +1,23 @@
 import * as messaging from "messaging";
 import { settingsStorage } from "settings";
 import { geolocation } from "geolocation";
+import { me } from "companion";
+
+var unsentChanges=false;
+
+if (me.launchReasons.settingsChanged) {
+  // Settings were changed while the companion was not running
+  unsentChanges=true;
+  console.log("Settings were changed while the companion was not running");
+}
 
 // Message socket opens
 messaging.peerSocket.onopen = () => {
   console.log("Companion Socket Open");
-  restoreSettings();
+  if(unsentChanges){
+    console.log("Sending settings");
+    restoreSettings();
+  }
 };
 
 // Message socket closes
@@ -15,13 +27,28 @@ messaging.peerSocket.onclose = () => {
 
 // A user changes settings
 settingsStorage.onchange = evt => {
-  let data = {
-    key: evt.key,
-    newValue: evt.newValue
-  };
-  sendVal(data);
-  if(evt.key==="BlastURL")
-    sendVal({key:'blastNum', newValue:JSON.parse(settingsStorage.getItem('BlastURL')).length});
+  console.log(evt);
+  // console.log(evt.newValue);
+  let tmp=evt.newValue.replace(/[\u201C\u201D]/g, '\\"');
+  // console.log(tmp)
+  // console.log(JSON.parse(tmp))
+  
+  // let tmp=JSON.parse(evt.newValue);
+  // tmp=tmp.replace(/[\u201C\u201D]/g, '"');
+  // console.log(tmp);
+  
+  settingsStorage.setItem(evt.key, tmp);
+  // console.log(evt.key+" | "+evt.key.includes("BlastURL"));
+  if(!evt.key.includes("BlastURL")){
+    let data = {
+      key: evt.key,
+      newValue: tmp
+    };
+    sendVal(data);
+  }
+  else{
+    sendVal({key:evt.key, newValue:JSON.parse(settingsStorage.getItem(evt.key)).length});
+  }
 };
 
 // Restore any previously saved settings and send to the device
@@ -85,7 +112,7 @@ async function recieveHandler(evt) {
   if (data == ""){
     if (headers == ""){
       if(blast){
-        requestBlaster({method: "GET"})
+        requestBlaster({method: "GET"}, msg)
       }else{
         fetch(url, {method: "GET"}) 
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
@@ -94,7 +121,7 @@ async function recieveHandler(evt) {
     }
     else{
       if(blast){
-        requestBlaster({method: "GET", headers: JSON.parse(headers)})
+        requestBlaster({method: "GET", headers: JSON.parse(headers)}, msg)
       }else{
       fetch(url, {method: "GET", headers: JSON.parse(headers)})
         .then(function(response) {sendVal({key:'Response', value:response.ok})})
@@ -114,7 +141,7 @@ async function recieveHandler(evt) {
     
     if (headers == ""){
       if(blast){
-        requestBlaster({method: "POST", body: data})
+        requestBlaster({method: "POST", body: data}, msg)
       }else{
         fetch(url, {method: "POST", body: data}) 
           .then(function(response) {sendVal({key:'Response', value:response.ok})})
@@ -123,7 +150,7 @@ async function recieveHandler(evt) {
     }
     else {
       if(blast){
-        requestBlaster({method: "POST", headers: JSON.parse(headers), body: data})
+        requestBlaster({method: "POST", headers: JSON.parse(headers), body: data}, msg)
       }else{
       fetch(url, {method: "POST", headers: JSON.parse(headers), body: data})
         .then(function(res){sendVal({key:'Response', value:res.ok}); return res})
@@ -223,8 +250,8 @@ async function getLocation(){
   Fires off multile web requests on one button click
   Passed the url and relevant request data
 */
-async function requestBlaster(data){
-  let urls=JSON.parse(settingsStorage.getItem('BlastURL'));
+async function requestBlaster(data, msg){
+  let urls=JSON.parse(settingsStorage.getItem('BlastURL'+msg));
   let i;
   for(i in urls){
     console.log(urls[i].name);
@@ -236,9 +263,13 @@ async function requestBlaster(data){
   }
 }
 
+//Default settings values
 //If blast values are not set, set them all to false
 if(settingsStorage.getItem('Blast1')==null){
   settingsStorage.setItem('Blast1',false);
   settingsStorage.setItem('Blast2',false);
   settingsStorage.setItem('Blast3',false);
+  settingsStorage.setItem('Color1', "orange")
+  settingsStorage.setItem('Color2', "red")
+  settingsStorage.setItem('Color3', "green")
 }

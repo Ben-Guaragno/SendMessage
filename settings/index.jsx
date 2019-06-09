@@ -1,3 +1,14 @@
+var colorArray=[
+  {color: 'red'},
+  {color: 'orange'},
+  {color: 'green'},
+  {color: 'aquamarine'},
+  {color: 'deepskyblue'},
+  {color: 'plum'},
+  {color: 'tomato'},
+  {color: 'sandybrown'}
+]
+
 function mySettings(props) {
   return (
     <Page>
@@ -11,6 +22,7 @@ function mySettings(props) {
           settingsKey="URL1"
           label="URL:"
           disabled={!(props.settings.Blast1 === "false")}
+          type="url"
         />
         <TextInput
           settingsKey="Data1"
@@ -20,10 +32,33 @@ function mySettings(props) {
           settingsKey="Headers1"
           label="Headers:"
         />
+        <ColorSelect
+          settingsKey="Color1"
+          colors={colorArray}
+          centered
+        />
         <Toggle
           settingsKey="Blast1"
           label="Blast"
         />
+        
+        {props.settings.Blast1!=null && JSON.parse(props.settings.Blast1) &&
+        <AdditiveList
+          settingsKey="BlastURL1"
+          addAction={
+            <TextInput
+              title="Add URL"
+              label="Add URL"
+              placeholder="URL"
+              type="url"
+            />
+          }
+          renderItem={({name}) =>
+            <Text>{name}</Text>
+          }
+        />
+        }
+        
       </Section>
       <Section
         title={<Text bold align="center">Message 2</Text>}>
@@ -35,6 +70,7 @@ function mySettings(props) {
           settingsKey="URL2"
           label="URL:"
           disabled={!(props.settings.Blast2 === "false")}
+          type="url"
         />
         <TextInput
           settingsKey="Data2"
@@ -44,10 +80,33 @@ function mySettings(props) {
           settingsKey="Headers2"
           label="Headers:"
         />
+        <ColorSelect
+          settingsKey="Color2"
+          colors={colorArray}
+          centered
+        />
         <Toggle
           settingsKey="Blast2"
           label="Blast"
         />
+        
+        {props.settings.Blast2!=null && JSON.parse(props.settings.Blast2) &&
+        <AdditiveList
+          settingsKey="BlastURL2"
+          addAction={
+            <TextInput
+              title="Add URL"
+              label="Add URL"
+              placeholder="URL"
+              type="url"
+            />
+          }
+          renderItem={({name}) =>
+            <Text>{name}</Text>
+          }
+        />
+        }
+        
       </Section>
       <Section
         title={<Text bold align="center">Message 3</Text>}>
@@ -59,6 +118,7 @@ function mySettings(props) {
           settingsKey="URL3"
           label="URL:"
           disabled={!(props.settings.Blast3 === "false")}
+          type="url"
         />
         <TextInput
           settingsKey="Data3"
@@ -68,27 +128,60 @@ function mySettings(props) {
           settingsKey="Headers3"
           label="Headers:"
         />
+        <ColorSelect
+          settingsKey="Color3"
+          colors={colorArray}
+          centered
+        />
         <Toggle
           settingsKey="Blast3"
           label="Blast"
         />
+        
+        
+        
+        {props.settings.Blast3!=null && JSON.parse(props.settings.Blast3) &&
+        <AdditiveList
+          settingsKey="BlastURL3"
+          addAction={
+            <TextInput
+              title="Add URL"
+              label="Add URL"
+              placeholder="URL"
+              type="url"
+            />
+          }
+          renderItem={({name}) =>
+            <Text>{name}</Text>
+          }
+        />
+        }
+        
       </Section>
       <Section
         title={<Text bold align="center">Blast URLs</Text>}>
         <AdditiveList
           settingsKey="BlastURL"
+          title="Test Title"
           addAction={
             <TextInput
+              title="Add URL"
               label="Add URL"
+              placeholder="URL"
+              type="url"
             />
           }
           renderItem={({name}) =>
-            <TextImageRow
-              label={"URL: "+name}
-            />
+//            <TextImageRow
+//              label={"URL: "+name}
+//            />
+            <Text>{name}</Text>
           }
         />
-        <Text>Setting a Message to blast will send an identical request to every listed URL</Text>
+        <Text>
+          Setting a Message to blast will send an identical request to every listed URL.
+          Note that the URL listed in the respective message's section will NOT be included in the blast.
+        </Text>
       </Section>
       <Section
         title={<Text bold align="center">Instructions</Text>}>
